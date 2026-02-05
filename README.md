@@ -1,1 +1,88 @@
-# ranui
+# RanUI Blog 🚀
+
+RanUI 是一个基于 PHP 开发的高性能、简洁且功能强大的博客/内容管理系统。它具有轻量级的核心架构，支持插件扩展和主题定制，旨在为用户提供最纯粹的写作和阅读体验。
+
+🌐 **官方网站**: [Geknet.com](https://Geknet.com)
+
+---
+
+## ✨ 项目特性
+
+- **极简架构**: 采用原生的 PHP 开发，无沉重的第三方依赖，响应极快。
+- **自定义主题**: 轻松切换和导出主题。
+- **插件系统**: 支持动态加载功能模块。
+- **响应式设计**: 完美适配手机、平板和桌面端。
+- **SEO 友好**: 自动优化标题与 meta 标签。
+
+---
+
+## 🛠️ 安装方法
+
+### 1. 环境要求
+- PHP 7.4 或更高版本
+- MySQL 5.7 或更高版本
+- Nginx 或 Apache
+
+### 2. 克隆项目
+```bash
+git clone https://github.com/liyiuande-prog/ranui.git
+cd ranui
+```
+
+### 3. 部署 Web 服务
+将你的 Nginx 或 Apache 的根目录指向项目中的 `public` 文件夹。
+*例如 Nginx 配置：*
+```nginx
+root /path/to/ranui/public;
+location / {
+    try_files $uri $uri/ /index.php?$query_string;
+}
+```
+
+### 4. 导入数据库
+创建一个新的 MySQL 数据库（如 `ranui_db`），并导入项目根目录下的 `ranui_db.sql` 文件：
+```bash
+mysql -u your_user -p ranui_db < ranui_db.sql
+```
+
+### 5. 修改配置
+编辑 `app/Config/config.php` 文件，填入你的数据库连接信息：
+```php
+'db' => [
+    'host' => 'localhost',
+    'name' => '你的数据库名',
+    'user' => '用户名',
+    'pass' => '密码',
+],
+```
+
+---
+
+## 📖 使用说明
+
+- **后台管理**: 访问 `域名/admin` 进入管理面板。
+- **发布文章**: 在后台可以进行分类管理、文章撰写以及评论审核。
+- **主题更换**: 编辑 `app/Config/config.php` 中的 `'theme'` 项或在后台进行切换。
+
+---
+
+## ☕ 赞赏支持
+
+如果你觉得这个项目对你有帮助，欢迎请作者喝杯咖啡！
+
+### 如何添加你的赞赏码？
+1. 将你的收款二维码图片放到 `public/assets/` 文件夹下。
+2. 在下方使用 Markdown 语法引用图片：
+
+| 微信支付 | 支付宝 |
+| :---: | :---: |
+| <img src="public/assets/wechat_pay.png" width="200"> | <img src="public/assets/alipay.png" width="200"> |
+
+> *注：请将 `wechat_pay.png` 换成你实际的文件名。*
+
+---
+
+## 📜 开源协议
+本项目采用 MIT 协议开源。
+
+Copyright (c) 2026 [xuran](https://Geknet.com)
