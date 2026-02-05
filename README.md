@@ -29,7 +29,14 @@ git clone https://github.com/liyiuande-prog/ranui.git
 cd ranui
 ```
 
-### 3. 部署 Web 服务
+### 3. 设置目录权限
+为了确保插件上传和系统日志、缓存能够正常运行，请为以下目录开启写入权限：
+```bash
+chmod -R 777 plugins
+chmod -R 777 storage
+```
+
+### 4. 部署 Web 服务
 将你的 Nginx 或 Apache 的根目录指向项目中的 `public` 文件夹。
 *例如 Nginx 配置：*
 ```nginx
@@ -70,13 +77,9 @@ mysql -u your_user -p ranui_db < ranui_db.sql
 
 如果你觉得这个项目对你有帮助，欢迎请作者喝杯咖啡！
 
-### 如何添加你的赞赏码？
-1. 将你的收款二维码图片放到 `public/assets/` 文件夹下。
-2. 在下方使用 Markdown 语法引用图片：
-
 | 微信支付 | 支付宝 |
 | :---: | :---: |
-| <img src="public/assets/wechat_pay.png" width="200"> | <img src="public/assets/alipay.png" width="200"> |
+| <img src="https://www.geknet.com/file/view?p=uploads/images/2026/02/698492147dbb5.png" width="200"> | <img src="https://www.geknet.com/file/view?p=uploads/images/2026/02/698492334fa9d.png" width="200"> |
 
 > *注：请将 `wechat_pay.png` 换成你实际的文件名。*
 
