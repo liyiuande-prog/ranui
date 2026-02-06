@@ -104,11 +104,9 @@ RanUI 支持通过 Workerman 实现即时聊天和系统通知：
 | :---: | :---: |
 | <img src="https://www.geknet.com/file/view?p=uploads/images/2026/02/698492147dbb5.png" width="200"> | <img src="https://www.geknet.com/file/view?p=uploads/images/2026/02/698492334fa9d.png" width="200"> |
 
-> *注：请将 `wechat_pay.png` 换成你实际的文件名。*
-
 ---
 
 ## 📜 开源协议
 本项目采用 MIT 协议开源。
 
-Copyright (c) 2026 [xuran](https://Geknet.com)
+Copyright (c) 2026 [RanUI](https://Geknet.com)
