@@ -550,51 +550,12 @@ function submitCaptcha() {
     }
     input.value = pointsStr;
     
-    // --- Security Fix: Encrypt password if manually submitting ---
-    const passInput = form.querySelector('input[name="password"]');
-    const plainPass = passInput.value;
-    if (plainPass && plainPass.length < 100) {
-        try {
-            const encryptor = new JSEncrypt();
-            encryptor.setPublicKey(RSA_PUBLIC_KEY);
-            const encrypted = encryptor.encrypt(plainPass);
-            if (encrypted) {
-                passInput.value = encrypted;
-            }
-        } catch(err) {
-            console.error("Encryption failed during captcha submit", err);
-        }
-    }
-    
-    // Submit via AJAX to handle 2FA
-    const formData = new FormData(form);
-    formData.append('ajax', '1');
-    
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.action === '2fa_required') {
-            closeCaptcha();
-            openTwoFAModal();
-        } else if (res.redirect) {
-            window.location.href = res.redirect;
-        } else if (res.error || res.message) {
-            alert(res.error || res.message);
-            location.reload();
-        } else {
-            form.submit(); // Fallback
-        }
-    })
-    .catch(err => {
-        console.error("AJAX Login Error:", err);
-        form.submit();
-    });
+    // Close modal
+    closeCaptcha();
+
+    // Trigger form submit programmatically
+    // This will trigger the event listener below
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
 }
 
 // Intercept Login Form
@@ -620,7 +581,40 @@ document.getElementById('form-password').addEventListener('submit', function(e) 
             
             if (encrypted) {
                 passInput.value = encrypted; // Replace with encrypted text
-                this.submit(); // Submit underlying form
+                
+                // Submit via AJAX for 2FA handling
+                const formData = new FormData(this);
+                // We don't need to append ajax=1 manually if we use X-Requested-With header, but let's keep it safe
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.action === '2fa_required') {
+                        openTwoFAModal();
+                    } else if (res.redirect) {
+                        window.location.href = res.redirect;
+                    } else if (res.success) {
+                         window.location.reload();
+                    } else {
+                        // Error case
+                        alert(res.message || res.error || '登录失败');
+                        // Reset captcha so user can try again
+                        this.querySelector('input[name="captcha_points"]').remove();
+                        passInput.value = plainPass; // Restore plain password for retry
+                    }
+                })
+                .catch(err => {
+                    console.error("Login Error:", err);
+                    alert('网络充值或服务器错误');
+                    passInput.value = plainPass;
+                });
+
             } else {
                 alert('安全加密环境初始化失败，请刷新页面');
             }
@@ -629,6 +623,7 @@ document.getElementById('form-password').addEventListener('submit', function(e) 
             alert('加密模块加载失败，请检查网络');
         }
     } else {
+        // Already encrypted or empty? Should not happen in normal flow.
         this.submit();
     }
 });

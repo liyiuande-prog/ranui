@@ -57,12 +57,20 @@ class AuthController extends Controller
         // 1. Rate Limiting
         $limitMsg = $this->checkRateLimit();
         if ($limitMsg) {
+            if ($this->isAjax()) {
+                $this->json(['success' => false, 'message' => $limitMsg]);
+                return;
+            }
             $this->view('login', ['error' => $limitMsg, 'username' => $username, 'title' => '登录']);
             return;
         }
 
         // 2. CSRF Check
         if (!\Core\Csrf::check($_POST['csrf_token'] ?? '')) {
+            if ($this->isAjax()) {
+                $this->json(['success' => false, 'message' => '安全令牌无效，请刷新页面重试']);
+                return;
+            }
             $this->view('login', ['error' => '安全令牌无效，请刷新页面重试', 'username' => $username, 'title' => '登录']);
             return;
         }
@@ -71,12 +79,20 @@ class AuthController extends Controller
         if (class_exists('Core\Captcha')) {
             $points = $_POST['captcha_points'] ?? '';
             if (empty($points) || !\Core\Captcha::check($points)) {
+                if ($this->isAjax()) {
+                    $this->json(['success' => false, 'message' => '验证码验证失败，请重新尝试']);
+                    return;
+                }
                 $this->view('login', ['error' => '验证码验证失败，请重新尝试', 'username' => $username, 'title' => '登录']);
                 return;
             }
         }
 
         if (empty($username) || empty($password)) {
+            if ($this->isAjax()) {
+                $this->json(['success' => false, 'message' => '账号和密码不能为空']);
+                return;
+            }
             $this->view('login', ['error' => '账号和密码不能为空', 'username' => $username, 'title' => '登录']);
             return;
         }
@@ -167,6 +183,11 @@ class AuthController extends Controller
                 \Plugins\Ran_Task\Service::check($user['id'], 'daily_login');
             }
 
+            if ($this->isAjax()) {
+                $this->json(['success' => true, 'redirect' => url('/')]);
+                return;
+            }
+
             header('Location: ' . url('/'));
             exit;
         }
@@ -182,8 +203,22 @@ class AuthController extends Controller
         // Log "0" as user_id for unknown user, but record username attempted
         $this->logAccess(0, 'login_failed', 0, "Username: $username, IP: " . $this->getIp());
 
+        if ($this->isAjax()) {
+            $this->json(['success' => false, 'message' => $msg]);
+            return;
+        }
 
         $this->view('login', ['error' => $msg, 'username' => $username, 'title' => '登录']);
+    }
+
+    private function isAjax() {
+        return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') || isset($_POST['ajax']);
+    }
+
+    private function json($data) {
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
     }
 
     public function register()
