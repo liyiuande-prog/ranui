@@ -81,26 +81,43 @@ echo '</style>';
                     </div>
                     
                     <div class="space-y-2">
-                        <label class="block text-xs font-bold text-ink-400 dark:text-gray-500 uppercase tracking-wider">发布到圈子</label>
-                        <?php if(!empty($circle_id)): ?>
-                            <?php 
-                                $cid = (int)$circle_id;
-                                $cName = '未知圈子';
-                                $db = \Core\Database::getInstance(config('db'));
-                                $circle = $db->query("SELECT name FROM circles WHERE id = ?", [$cid])->fetch();
-                                if($circle) $cName = $circle['name'];
-                            ?>
-                            <div class="px-4 py-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 font-bold border border-blue-100 dark:border-blue-900/30">
-                                <i class="fas fa-bullseye mr-2"></i> <?= htmlspecialchars($cName) ?>
-                            </div>
-                            <input type="hidden" name="circle_id" value="<?= $cid ?>">
+                        <?php if(is_plugin_active('Ran_Circle')): ?>
+                            <label class="block text-xs font-bold text-ink-400 dark:text-gray-500 uppercase tracking-wider">发布到圈子</label>
+                            <?php if(!empty($circle_id)): ?>
+                                <?php 
+                                    $cid = (int)$circle_id;
+                                    $cName = '未知圈子';
+                                    $db = \Core\Database::getInstance(config('db'));
+                                    $circle = $db->query("SELECT name FROM circles WHERE id = ?", [$cid])->fetch();
+                                    if($circle) $cName = $circle['name'];
+                                ?>
+                                <div class="px-4 py-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 font-bold border border-blue-100 dark:border-blue-900/30">
+                                    <i class="fas fa-bullseye mr-2"></i> <?= htmlspecialchars($cName) ?>
+                                </div>
+                                <input type="hidden" name="circle_id" value="<?= $cid ?>">
+                            <?php else: ?>
+                                <div class="relative">
+                                    <select name="circle_id" class="w-full pl-4 pr-10 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all appearance-none cursor-pointer text-ink-900 dark:text-white">
+                                        <option value="0">请选择圈子...</option>
+                                        <?php if(!empty($circles)): ?>
+                                            <?php foreach($circles as $c): ?>
+                                                <option value="<?= $c['id'] ?>"><?= e($c['name']) ?></option>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                    <div class="absolute right-4 top-3.5 pointer-events-none text-ink-400">
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         <?php else: ?>
+                            <label class="block text-xs font-bold text-ink-400 dark:text-gray-500 uppercase tracking-wider">文章分类</label>
                             <div class="relative">
-                                <select name="circle_id" class="w-full pl-4 pr-10 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all appearance-none cursor-pointer text-ink-900 dark:text-white">
-                                    <option value="0">请选择圈子...</option>
-                                    <?php if(!empty($circles)): ?>
-                                        <?php foreach($circles as $c): ?>
-                                            <option value="<?= $c['id'] ?>"><?= e($c['name']) ?></option>
+                                <select name="category_id" class="w-full pl-4 pr-10 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all appearance-none cursor-pointer text-ink-900 dark:text-white" required>
+                                    <option value="">请选择分类...</option>
+                                    <?php if(!empty($categories)): ?>
+                                        <?php foreach($categories as $cat): ?>
+                                            <option value="<?= $cat['id'] ?>"><?= e($cat['name']) ?></option>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </select>
@@ -178,7 +195,8 @@ document.getElementById('writeForm').addEventListener('submit', function(e) {
         titleInput.focus();
         return false;
     }
-    // 验证圈子选择
+    // 验证圈子或分类选择
+    <?php if(is_plugin_active('Ran_Circle')): ?>
     const circleSelect = this.querySelector('select[name="circle_id"]');
     if (circleSelect && circleSelect.value == '0') {
         e.preventDefault();
@@ -186,6 +204,15 @@ document.getElementById('writeForm').addEventListener('submit', function(e) {
         circleSelect.focus();
         return false;
     }
+    <?php else: ?>
+    const categorySelect = this.querySelector('select[name="category_id"]');
+    if (categorySelect && categorySelect.value == '') {
+        e.preventDefault();
+        alert('请选择一个文章分类');
+        categorySelect.focus();
+        return false;
+    }
+    <?php endif; ?>
 });
 </script>
 

@@ -134,9 +134,11 @@ class PostController extends Controller
         $cover_image = $_POST['cover_image'] ?? '';
         $status = 'published';
         
-        // --- Circle Logic ---
+        // --- Circle & Category Logic ---
         $circle_id = (int)($_POST['circle_id'] ?? 0);
-        if ($circle_id > 0) {
+        $category_id = (int)($_POST['category_id'] ?? 0);
+        
+        if (is_plugin_active('Ran_Circle') && $circle_id > 0) {
             $db = Database::getInstance(config('db'));
             $circle = $db->query("SELECT category_id FROM circles WHERE id = ?", [$circle_id])->fetch();
             if ($circle) {
@@ -156,8 +158,12 @@ class PostController extends Controller
                 return;
             }
         } else {
-            echo "<script>alert('请选择一个要发布的圈子');history.back();</script>";
-            return;
+            // If plugin NOT active OR no circle selected, we must have a category_id
+            if ($category_id <= 0) {
+                 $msg = is_plugin_active('Ran_Circle') ? '请选择一个要发布的圈子' : '请选择文章分类';
+                 echo "<script>alert('$msg');history.back();</script>";
+                 return;
+            }
         }
         
         if (empty($title)) {
