@@ -51,7 +51,7 @@ class App
         if (file_exists(ROOT_PATH . '/web/admin.php')) {
             require ROOT_PATH . '/web/admin.php';
         }
-
+        
         $uri = $this->getRequestUri();
         $method = $_SERVER['REQUEST_METHOD'];
 

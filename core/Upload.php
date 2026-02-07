@@ -14,24 +14,14 @@ class Upload extends Controller
 
         // API Token Support
         if (!$user) {
-            $token = $_SERVER['HTTP_TOKEN'] ?? ($_SERVER['HTTP_X_TOKEN'] ?? ($_REQUEST['token'] ?? ''));
-            if (empty($token)) {
-                $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-                if (preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
-                    $token = $matches[1];
-                }
-            }
-
-            if ($token) {
+            $uid = $this->getAuthId();
+            if ($uid > 0) {
                 try {
                     $db = \Core\Database::getInstance(config('db'));
-                    $row = $db->query("SELECT user_id FROM user_tokens WHERE token = ? AND expires_at > NOW()", [$token])->fetch();
-                    if ($row) {
-                        $u = $db->query("SELECT * FROM users WHERE id = ?", [$row['user_id']])->fetch();
-                        if ($u) {
-                            $user = $u;
-                            $_SESSION['user'] = $u; // Simulate session for hooks
-                        }
+                    $u = $db->query("SELECT * FROM users WHERE id = ?", [$uid])->fetch();
+                    if ($u) {
+                        $user = $u;
+                        $_SESSION['user'] = $u; // Simulate session for hooks
                     }
                 } catch (\Exception $e) {}
             }

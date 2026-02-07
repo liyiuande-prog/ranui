@@ -50,6 +50,7 @@
                 <div>
                     <h4 class="text-sm font-bold uppercase tracking-widest text-ink-400 dark:text-gray-500 mb-6">导航</h4>
                     <ul class="flex flex-wrap gap-4 md:flex-col md:gap-y-4 text-sm text-ink-600 dark:text-gray-400">
+                        <li><a href="https://geknet.com" class="hover:text-ink-900 dark:hover:text-white transition-colors">RanUI 官网</a></li>
                         <?php \Core\Hook::listen('theme_header_nav'); ?>
                         <?php if($l = $getLink('about')): ?><li><a href="<?= $l ?>" class="hover:text-ink-900 dark:hover:text-white transition-colors">关于我们</a></li><?php endif; ?>
                         <?php if($l = $getLink('help')): ?><li><a href="<?= $l ?>" class="hover:text-ink-900 dark:hover:text-white transition-colors">帮助中心</a></li><?php endif; ?>
