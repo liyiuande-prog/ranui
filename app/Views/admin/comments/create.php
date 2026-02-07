@@ -15,6 +15,7 @@
     <main class="p-8 flex-1 max-w-2xl mx-auto w-full">
         <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
             <form action="<?= url('/admin/comments/store') ?>" method="POST" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="<?= \Core\Csrf::generate() ?>">
                 
                 <div class="space-y-2">
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 ml-1">所属文章 Post</label>
