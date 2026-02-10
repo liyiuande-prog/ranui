@@ -563,7 +563,10 @@ document.getElementById('form-password').addEventListener('submit', function(e) 
     e.preventDefault(); 
     
     // 1. Captcha Check
-    if (!this.querySelector('input[name="captcha_points"]')) {
+    // Check global config injected from PHP
+    const ENABLE_CAPTCHA = <?= get_option('login_captcha_enable', '1') ?>;
+    
+    if (ENABLE_CAPTCHA && !this.querySelector('input[name="captcha_points"]')) {
         openCaptcha();
         return;
     }

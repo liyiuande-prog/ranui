@@ -16,6 +16,52 @@ $config = require APP_PATH . '/Config/config.php';
 // Load Helpers
 require CORE_PATH . '/helpers.php';
 
+// Installation Check & Routing
+// Get the path from request URI, removing query string
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// SECURITY: If installed but /install directory still exists, force redirect to security warning
+// This prevents access to ANY page until /install is deleted
+if (file_exists(ROOT_PATH . '/install.lock') && is_dir(ROOT_PATH . '/install')) {
+    // Only allow access to /install?step=4 (security warning page)
+    if ($requestUri !== '/install' || ($_GET['step'] ?? null) != 4) {
+        header('Location: /install?step=4');
+        exit;
+    }
+}
+
+// If user is trying to access /install but directory is deleted, redirect to home
+if (strpos($requestUri, '/install') === 0 && !is_dir(ROOT_PATH . '/install')) {
+    header('Location: /');
+    exit;
+}
+
+if (strpos($requestUri, '/install') === 0 && is_dir(ROOT_PATH . '/install')) {
+       // Serve install files
+       if ($requestUri === '/install' || $requestUri === '/install/' || $requestUri === '/install/index.php') {
+           chdir(ROOT_PATH . '/install');
+           require ROOT_PATH . '/install/index.php';
+           exit;
+       }
+       
+       if ($requestUri === '/install/process.php') {
+           chdir(ROOT_PATH . '/install');
+           require ROOT_PATH . '/install/process.php';
+           exit;
+       }
+        
+       // 404 for other install files
+       header("HTTP/1.0 404 Not Found");
+       echo "File not found: " . htmlspecialchars($requestUri);
+       exit;
+}
+
+// Redirect to install if not installed and not accessing install
+if (!file_exists(ROOT_PATH . '/install.lock') && is_dir(ROOT_PATH . '/install')) {
+    header('Location: /install/');
+    exit;
+}
+
 // Simple Autoloader
 spl_autoload_register(function ($class) {
     // Prefix mapping

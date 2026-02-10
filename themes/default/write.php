@@ -38,24 +38,25 @@ echo '</style>';
 <main class="pt-32 pb-20 px-6 w-full max-w-7xl mx-auto">
     <div class="mb-10 flex items-center justify-between">
         <div>
-            <h1 class="text-3xl font-extrabold text-ink-900 dark:text-gray-100">开始写作</h1>
+            <h1 class="text-3xl font-extrabold text-ink-900 dark:text-gray-100"><?= isset($post) ? '编辑文章' : '开始写作' ?></h1>
             <p class="text-ink-500 dark:text-gray-400 mt-2">分享你的故事与见解</p>
         </div>
         <div>
              <button type="submit" form="writeForm" class="bg-ink-900 text-white dark:bg-white dark:text-black px-8 py-3 rounded-full font-bold hover:scale-105 transition-transform shadow-lg shadow-ink-900/20">
-                <i class="fas fa-paper-plane mr-2"></i> 发布文章
+                <i class="fas fa-paper-plane mr-2"></i> <?= isset($post) ? '更新文章' : '发布文章' ?>
             </button>
         </div>
     </div>
     <form id="writeForm" action="<?= url('/post/store') ?>" method="POST" class="space-y-8">
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+        <input type="hidden" name="id" value="<?= isset($post) ? $post['id'] : 0 ?>">
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Left: Editor -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Title -->
                 <div class="space-y-2">
-                    <input type="text" name="title" class="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-100 dark:border-white/10 focus:border-gray-100 dark:focus:border-white/10 focus:ring-0 outline-none transition-all text-3xl font-extrabold placeholder-gray-300 dark:placeholder-gray-600 text-ink-900 dark:text-white" placeholder="请输入文章标题..." required>
+                    <input type="text" name="title" value="<?= isset($post) ? e($post['title']) : '' ?>" class="w-full px-0 py-4 bg-transparent border-0 border-b-2 border-gray-100 dark:border-white/10 focus:border-gray-100 dark:focus:border-white/10 focus:ring-0 outline-none transition-all text-3xl font-extrabold placeholder-gray-300 dark:placeholder-gray-600 text-ink-900 dark:text-white" placeholder="请输入文章标题..." required>
                 </div>
                 
                 <!-- Editor Container -->
@@ -63,7 +64,7 @@ echo '</style>';
                 <?php
                     $name = 'content';
                     $id = 'editor';
-                    $content = '';
+                    $content = isset($post) ? $post['content'] : '';
                     $placeholder = '开始撰写您的精彩内容 (支持 Markdown)...';
                     $enableMentions = true;
                     require APP_PATH . '/Views/components/editor.php';
@@ -101,7 +102,7 @@ echo '</style>';
                                         <option value="0">请选择圈子...</option>
                                         <?php if(!empty($circles)): ?>
                                             <?php foreach($circles as $c): ?>
-                                                <option value="<?= $c['id'] ?>"><?= e($c['name']) ?></option>
+                                                <option value="<?= $c['id'] ?>" <?= (isset($post) && $post['circle_id'] == $c['id']) ? 'selected' : '' ?>><?= e($c['name']) ?></option>
                                             <?php endforeach; ?>
                                         <?php endif; ?>
                                     </select>
@@ -117,7 +118,7 @@ echo '</style>';
                                     <option value="">请选择分类...</option>
                                     <?php if(!empty($categories)): ?>
                                         <?php foreach($categories as $cat): ?>
-                                            <option value="<?= $cat['id'] ?>"><?= e($cat['name']) ?></option>
+                                            <option value="<?= $cat['id'] ?>" <?= (isset($post) && $post['category_id'] == $cat['id']) ? 'selected' : '' ?>><?= e($cat['name']) ?></option>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </select>
@@ -138,12 +139,12 @@ echo '</style>';
                 
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-ink-400 dark:text-gray-500 uppercase tracking-wider">文章摘要</label>
-                        <textarea name="description" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all h-32 resize-none text-ink-900 dark:text-white" placeholder="简单的介绍这篇文章..."></textarea>
+                        <textarea name="description" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all h-32 resize-none text-ink-900 dark:text-white" placeholder="简单的介绍这篇文章..."><?= isset($post) ? e($post['description']) : '' ?></textarea>
                     </div>
                     
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-ink-400 dark:text-gray-500 uppercase tracking-wider">文章标签</label>
-                        <input type="text" name="tags" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all text-ink-900 dark:text-white" placeholder="React, Vue3, 教程 (用逗号分隔)">
+                        <input type="text" name="tags" value="<?= isset($tags_str) ? e($tags_str) : '' ?>" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all text-ink-900 dark:text-white" placeholder="React, Vue3, 教程 (用逗号分隔)">
                         <p class="text-[10px] text-gray-400">使用逗号分隔多个标签，最多添加 5 个</p>
                     </div>
                     
@@ -151,7 +152,7 @@ echo '</style>';
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-ink-400 dark:text-gray-500 uppercase tracking-wider">封面图链接</label>
                     <?php if($canPostImage): ?>
-                    <input type="text" name="cover_image" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all text-ink-900 dark:text-white" placeholder="https://...">
+                    <input type="text" name="cover_image" value="<?= isset($post) ? e($post['cover_image']) : '' ?>" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/20 border border-transparent focus:bg-white dark:focus:bg-black focus:border-ink-900 dark:focus:border-white focus:ring-0 text-sm font-medium transition-all text-ink-900 dark:text-white" placeholder="https://...">
                     <?php else: ?>
                     <div class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-transparent text-sm font-medium text-gray-400 cursor-not-allowed flex items-center justify-between">
                          <span>封面设置不可用</span>

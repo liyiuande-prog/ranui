@@ -26,7 +26,7 @@ class Controller
     /**
      * Get Current Logged In User ID from Token
      */
-    public function getAuthId() {
+    protected function getAuthId() {
         $token = $_SERVER['HTTP_TOKEN'] ?? ($_SERVER['HTTP_X_TOKEN'] ?? '');
         if (empty($token) && isset($_SERVER['HTTP_AUTHORIZATION'])) {
             if (preg_match('/Bearer\s+(.*)$/i', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
@@ -48,7 +48,7 @@ class Controller
     /**
      * Send JSON Response
      */
-    public function apiJson($data) {
+    protected function apiJson($data) {
         if (ob_get_length()) ob_clean(); 
         header('Content-Type: application/json');
         echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
@@ -58,7 +58,7 @@ class Controller
     /**
      * Fix Asset URLs
      */
-    public function fullUrl($url) {
+    protected function fullUrl($url) {
         if (empty($url)) return '';
         if (strpos($url, 'http') === 0) return $url;
         

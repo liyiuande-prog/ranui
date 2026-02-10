@@ -86,6 +86,34 @@
                 </div>
             </div>
 
+            
+            <!-- Security Settings -->
+            <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+                <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-4">
+                    <i class="fas fa-shield-alt text-gray-400"></i>
+                    <h3 class="font-bold text-gray-800">安全设置 (Security)</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div>
+                            <h4 class="font-bold text-gray-800">登录验证码 (Login Captcha)</h4>
+                            <p class="text-xs text-gray-400 mt-1">启用后，登录时需完成点选验证。</p>
+                        </div>
+                        <div class="space-x-4">
+                             <label class="inline-flex items-center cursor-pointer gap-2">
+                                <input type="radio" name="login_captcha_enable" value="1" class="form-radio text-black focus:ring-black" <?= ($options['login_captcha_enable'] ?? '1') == '1' ? 'checked' : '' ?>>
+                                <span class="text-xs font-bold">开启</span>
+                            </label>
+                             <label class="inline-flex items-center cursor-pointer gap-2">
+                                <input type="radio" name="login_captcha_enable" value="0" class="form-radio text-black focus:ring-black" <?= ($options['login_captcha_enable'] ?? '1') == '0' ? 'checked' : '' ?>>
+                                <span class="text-xs font-bold">关闭</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Upload Settings -->
              <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
                 <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-4">

@@ -54,3 +54,6 @@ if ($pluginRoutes) {
         require_once $routeFile;
     }
 }
+
+// License Server Routes (Added by Auto-Agent)
+Router::post('/api/license/verify', 'App\Controllers\Api\LicenseController@verify');

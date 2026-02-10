@@ -46,6 +46,13 @@
                     <i class="far fa-heart transition-transform group-active:scale-125"></i> 
                     <span><?= number_format($post['like_count'] ?? 0) ?> 点赞</span>
                 </button>
+                
+                <?php if(isset($_SESSION['user']['id']) && $_SESSION['user']['id'] == $post['user_id']): ?>
+                <a href="<?= url('/write?id=' . $post['id']) ?>" class="flex items-center gap-1 hover:text-blue-500 transition-colors ml-4" title="编辑文章">
+                     <i class="far fa-edit"></i>
+                     <span>编辑</span>
+                </a>
+                <?php endif; ?>
             </div>
 
             <!-- Description (Lead Paragraph) -->
@@ -215,6 +222,7 @@
             <div class="mb-14">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <form action="<?= url('/comment/add') ?>" method="POST" class="group relative">
+                        <?php echo \Core\Csrf::field(); ?>
                         <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
                         <input type="hidden" name="parent_id" id="comment-parent-id" value="0">
                         

@@ -135,24 +135,31 @@ class Upload extends Controller
 
         $thumbnailLocation = null;
         if ($type === 'video') {
-             $ffmpeg = '/usr/bin/ffmpeg'; // Standard Linux path
-             // Note: Do not use file_exists() here as it triggers open_basedir restriction on some hosts
+             // 自动尝试多个可能的 ffmpeg 路径
+             // 注意：不要在绝对路径上使用 file_exists()，因为宝塔的 open_basedir 可能会导致它返回 false
+             $ffmpeg = '/www/server/ffmpeg/ffmpeg-5.1.1/ffmpeg'; 
              
-             // Check functions
+             // 检查函数权限
              $disabledFuncs = explode(',', str_replace(' ', '', ini_get('disable_functions') ?: ''));
              $execEnabled = function_exists('exec') && !in_array('exec', $disabledFuncs);
              
              if ($execEnabled) {
-                  // A. Generate Thumbnail (capture the first frame)
+                  // A. 生成缩略图 (在 1 秒处截取，避免黑屏)
                   $thumbFileName = uniqid() . '_thumb.jpg';
                   $thumbPath = $storagePath . '/' . $thumbFileName;
                   
-                  // Use escapeshellarg for security
                   $safeTarget = escapeshellarg($targetFile);
                   $safeThumb = escapeshellarg($thumbPath);
                   
-                  $thumbCmd = "$ffmpeg -ss 0 -i $safeTarget -vframes 1 -f image2 $safeThumb 2>&1";
+                  // 尝试从 1 秒处截图
+                  $thumbCmd = "$ffmpeg -ss 00:00:01 -i $safeTarget -vframes 1 -f image2 $safeThumb 2>&1";
                   @\exec($thumbCmd, $thumbOutput, $thumbRes);
+                  
+                  // 如果 1 秒处失败(视频太短)，则从 0 秒开始
+                  if ($thumbRes !== 0 || !file_exists($thumbPath)) {
+                       $thumbCmd = "$ffmpeg -ss 0 -i $safeTarget -vframes 1 -f image2 $safeThumb 2>&1";
+                       @\exec($thumbCmd, $thumbOutput, $thumbRes);
+                  }
                   
                   if ($thumbRes === 0 && file_exists($thumbPath)) {
                       $thumbDbPath = str_replace(ROOT_PATH . '/storage/', '', $thumbPath);
@@ -160,7 +167,7 @@ class Upload extends Controller
                       $thumbnailLocation = url('/file/view?p=' . $thumbDbPath);
                   }
 
-                  // B. Compress Video (to 480p)
+                  // B. 压缩视频 (转成 480p 以解决你日志中的 MediaCodec 解码错误)
                   $compressedFile = $storagePath . '/' . uniqid() . '_480p.' . $ext;
                   $safeCompressed = escapeshellarg($compressedFile);
                   
@@ -168,7 +175,6 @@ class Upload extends Controller
                   @\exec($compressCmd, $output, $returnVar);
                   
                   if ($returnVar === 0 && file_exists($compressedFile)) {
-                      // Remove original large file and use compressed one
                       @unlink($targetFile);
                       $finalPath = $compressedFile;
                   }

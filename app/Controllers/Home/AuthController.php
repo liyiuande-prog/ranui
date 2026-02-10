@@ -75,8 +75,9 @@ class AuthController extends Controller
             return;
         }
 
+
         // 3. Click Captcha Check
-        if (class_exists('Core\Captcha')) {
+        if (get_option('login_captcha_enable', '1') == '1' && class_exists('Core\Captcha')) {
             $points = $_POST['captcha_points'] ?? '';
             if (empty($points) || !\Core\Captcha::check($points)) {
                 if ($this->isAjax()) {

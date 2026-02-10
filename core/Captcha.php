@@ -92,6 +92,11 @@ class Captcha
     
     public static function check($points)
     {
+        // Global Bypass
+        if (function_exists('get_option') && get_option('login_captcha_enable', '1') !== '1') {
+            return true;
+        }
+
         if (session_status() === PHP_SESSION_NONE) session_start();
         $targets = $_SESSION['captcha_target'] ?? null;
         if (!$targets) return false;
