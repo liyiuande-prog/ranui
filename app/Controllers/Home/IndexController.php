@@ -38,6 +38,10 @@ class IndexController extends Controller
              } else {
                  $posts = [];
              }
+        } elseif ($tab === 'moyu') {
+             // MoYu Fetch happens separately via AJAX mostly, but for initial render we pass empty or pre-fetch
+             // Actually, the view logic handles it. We just need to avoid fetching local posts.
+             $posts = []; 
         } else {
              // Default: recommend
              $posts = $postModel->getRecommendedPosts($limit, $offset);

@@ -26,6 +26,9 @@
                 if (function_exists('is_plugin_active') && is_plugin_active('Ran_Follow')) {
                     $tabs['follow'] = '关注';
                 }
+                if (function_exists('is_plugin_active') && is_plugin_active('Ran_MoYu')) {
+                    $tabs['moyu'] = '摸鱼';
+                }
             ?>
             <div class="flex items-center justify-between border-b border-ink-100 dark:border-white/10 mb-4 md:mb-12">
                 <div class="flex gap-8">
@@ -158,7 +161,7 @@
                 <?php endif; ?>
                 <?php endif; ?>
                 <?php if (empty($posts)): ?>
-                    <div class="text-center py-20 text-ink-500 dark:text-gray-500">
+                    <div class="text-center  text-ink-500 dark:text-gray-500">
                         <?php if ($activeTab === 'follow'): ?>
                             <?php if (!isset($_SESSION['user']['id'])): ?>
                                 <div class="flex flex-col items-center gap-4">
@@ -179,6 +182,131 @@
                                     <a href="<?= url('/?tab=recommend') ?>" class="px-6 py-2 border border-ink-200 dark:border-white/20 rounded-full font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">去探索</a>
                                 </div>
                             <?php endif; ?>
+                        <?php elseif ($activeTab === 'moyu' && function_exists('is_plugin_active') && is_plugin_active('Ran_MoYu')): ?>
+                             <!-- MoYu Tab Content (AJAX Loaded) -->
+                             <!-- Feed Container -->
+                             <div id="moyu-feed-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                                    <div class="md:col-span-2 flex flex-col items-center gap-4 text-center py-12" id="moyu-placeholder">
+                                        <div class="w-16 h-16 bg-blue-50 dark:bg-blue-900/10 rounded-full flex items-center justify-center text-2xl text-blue-400 animate-pulse">
+                                            <i class="fas fa-coffee"></i>
+                                        </div>
+                                        <h3 class="text-lg font-bold text-ink-900 dark:text-white">摸鱼时间</h3>
+                                        <p class="text-sm text-gray-400 max-w-xs transition-opacity" id="moyu-loading-text">正在从全网搜集最新技术文章...</p>
+                                        <button onclick="openMoyuApply()" class="text-xs text-blue-500 hover:underline mt-2">申请收录我的博客</button>
+                                    </div>
+                             </div>
+
+                             <script>
+                                let moyuPage = 1;
+                                let isLoadingMoyu = false;
+
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    // Initial load PAGE 1
+                                    loadMoyuPage(1);
+                                });
+
+                                function loadMoyuPage(page) {
+                                    if(isLoadingMoyu) return;
+                                    isLoadingMoyu = true;
+                                    moyuPage = page;
+                                    
+                                    const container = document.getElementById('moyu-feed-container');
+
+                                    // Scroll to top of list if not first load ?
+                                    // container.scrollIntoView({ behavior: 'smooth' });
+
+                                    fetch('/moyu/list?ajax=1&page=' + page)
+                                        .then(r => r.text())
+                                        .then(html => {
+                                            const placeholder = document.getElementById('moyu-placeholder');
+                                            
+                                            if(html.trim()) {
+                                                // Replace ENTIRE content (no append for pagination style)
+                                                container.innerHTML = html;
+                                            } else {
+                                                if(page === 1) {
+                                                     document.getElementById('moyu-loading-text').innerText = '暂时没有摸鱼内容，请稍后再来';
+                                                }
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error(err);
+                                            const txt = document.getElementById('moyu-loading-text');
+                                            if(txt) txt.innerText = '加载失败，请刷新重试';
+                                        })
+                                        .finally(() => {
+                                            isLoadingMoyu = false;
+                                        });
+                                }
+
+                                function openMoyuApply() {
+                                    <?php if(!isset($_SESSION['user'])): ?>
+                                        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href);
+                                        return;
+                                    <?php endif; ?>
+                                    
+                                    document.getElementById('moyu-apply-modal').showModal();
+                                }
+
+                                function submitMoyuApply(e) {
+                                    e.preventDefault();
+                                    const btn = e.target.querySelector('button[type="submit"]');
+                                    const name = document.getElementById('apply-name').value;
+                                    const url = document.getElementById('apply-url').value;
+                                    
+                                    const originalText = btn.innerText;
+                                    btn.disabled = true;
+                                    btn.innerText = '提交中...';
+                                    
+                                    const form = new FormData();
+                                    form.append('name', name);
+                                    form.append('url', url);
+                                    
+                                    fetch('/moyu/apply', {
+                                        method: 'POST',
+                                        body: form
+                                    })
+                                    .then(r => r.json())
+                                    .then(res => {
+                                        if(res.success) {
+                                            alert(res.message);
+                                            document.getElementById('moyu-apply-modal').close();
+                                            e.target.reset();
+                                        } else {
+                                            alert(res.message || '提交失败');
+                                        }
+                                    })
+                                    .catch(err => {
+                                        alert('网络错误');
+                                    })
+                                    .finally(() => {
+                                        btn.disabled = false;
+                                        btn.innerText = originalText;
+                                    });
+                                }
+                             </script>
+
+                             <!-- Apply Modal -->
+                             <dialog id="moyu-apply-modal" class="backdrop:bg-black/40 rounded-xl p-0 w-full max-w-md shadow-2xl">
+                                <div class="p-6">
+                                    <h3 class="font-bold text-lg mb-4 text-ink-900">申请收录博客</h3>
+                                    <form onsubmit="submitMoyuApply(event)" class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">博客名称</label>
+                                            <input type="text" id="apply-name" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-0" placeholder="例如：我的技术小站" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">RSS/Atom 地址</label>
+                                            <input type="url" id="apply-url" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-0" placeholder="https://example.com/feed" required>
+                                            <p class="text-xs text-gray-400 mt-1">必须是有效的 RSS 订阅链接</p>
+                                        </div>
+                                        <div class="flex justify-end gap-2 mt-6">
+                                            <button type="button" onclick="document.getElementById('moyu-apply-modal').close()" class="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">取消</button>
+                                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">提交申请</button>
+                                        </div>
+                                    </form>
+                                </div>
+                             </dialog>
                         <?php else: ?>
                             <div class="flex flex-col items-center gap-4">
                                  <div class="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center text-2xl text-gray-400">
