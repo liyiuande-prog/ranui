@@ -57,6 +57,9 @@ composer require php-ffmpeg/php-ffmpeg  # 视频首帧裁剪
 composer require workerman/workerman    # 即时通讯与通知
 ```
 
+> **💡 提示**：为了使 `php-ffmpeg` 正常工作，您需要确保 PHP 环境开启了 `exec`、`shell_exec` 和 `proc_open` 函数。请检查您的 `php.ini` 文件，并将它们从 `disable_functions` 列表中移除（如果是使用宝塔面板，请在 PHP 设置的“禁用函数”中将其删除）。
+
+
 ---
 
 ## 📱 App 功能扩展
