@@ -35,7 +35,11 @@ class File extends Controller
             $refHost = parse_url($referer, PHP_URL_HOST);
             $hostNoPort = explode(':', $host)[0];
             
-            if ($refHost && strpos($refHost, $hostNoPort) === false) {
+            // Remove www. from both to allow cross-access
+            $cleanHost = str_replace('www.', '', $hostNoPort);
+            $cleanRefHost = $refHost ? str_replace('www.', '', $refHost) : '';
+            
+            if ($cleanRefHost && strpos($cleanRefHost, $cleanHost) === false) {
                  header('HTTP/1.0 403 Forbidden'); 
                  echo 'Hotlinking Denied';
                  exit;
