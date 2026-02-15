@@ -36,8 +36,11 @@ chmod -R 777 plugins
 chmod -R 777 storage
 ```
 
-### 4. 部署 Web 服务
+### 4. 部署与安装
 将你的 Nginx 或 Apache 的根目录指向项目中的 `public` 文件夹。
+
+随后在浏览器中直接访问您的域名，系统将自动进入安装引导程序（`install`），帮助您轻松完成数据库连接和站点初始化。
+
 *例如 Nginx 配置：*
 ```nginx
 root /path/to/ranui/public;
@@ -46,24 +49,8 @@ location / {
 }
 ```
 
-### 4. 导入数据库
-创建一个新的 MySQL 数据库（如 `ranui_db`），并导入项目根目录下的 `ranui_db.sql` 文件：
-```bash
-mysql -u your_user -p ranui_db < ranui_db.sql
-```
 
-### 5. 修改配置
-编辑 `app/Config/config.php` 文件，填入你的数据库连接信息：
-```php
-'db' => [
-    'host' => 'localhost',
-    'name' => '你的数据库名',
-    'user' => '用户名',
-    'pass' => '密码',
-],
-```
-
-### 6. 安装依赖 (App 扩展功能)
+### 5. 安装依赖 (App 扩展功能)
 若需要使用视频剪辑和即时通讯功能，请在项目根目录运行：
 ```bash
 composer require php-ffmpeg/php-ffmpeg  # 视频首帧裁剪
